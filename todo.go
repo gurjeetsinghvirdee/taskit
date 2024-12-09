@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
 // TodoItem represents a single todo item
 type TodoItem struct {
-	ID		  int
 	Title     string
+	OriginalID int
 	Completed bool
 	CreatedAt time.Time
 }
@@ -20,19 +21,22 @@ type TodoList struct {
 
 // AddItem adds a new todo item to the list
 func (tl *TodoList) AddItem(title string) {
-	item := &TodoItem{
-		ID:        len(tl.Items) + 1,
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Intn(10000) // Generate a random ID between 0 and 9999
+	newItem := &TodoItem{
 		Title:     title,
+		OriginalID: id,
 		Completed: false,
 		CreatedAt: time.Now(),
 	}
-	tl.Items = append(tl.Items, item)
+	tl.Items = append(tl.Items, newItem)
+	fmt.Printf("Task '%s' added with ID %d.\n", title, id)
 }
 
 // CompleteItem marks a todo item as completed
 func (tl *TodoList) CompleteItem(id int) {
 	for _, item := range tl.Items {
-		if item.ID == id {
+		if item.OriginalID == id {
 			item.Completed = true
 			fmt.Printf("Task '%s' completed.\n", item.Title)
 			return
@@ -44,7 +48,7 @@ func (tl *TodoList) CompleteItem(id int) {
 // DeleteItem deletes a todo item from the list
 func (tl *TodoList) DeleteItem(id int) {
 	for i, item := range tl.Items {
-		if item.ID == id {
+		if item.OriginalID == id {
 			tl.Items = append(tl.Items[:i], tl.Items[i+1:]...)
 			fmt.Printf("Task '%s' deleted.\n", item.Title)
 			return
@@ -54,7 +58,7 @@ func (tl *TodoList) DeleteItem(id int) {
 }
 
 
-// PrintList prints the TodoList to the console
+// PrintList prints the Todo list to the console
 func (tl *TodoList) PrintList() {
 	fmt.Println("Todo List:")
 	for _, item := range tl.Items {
@@ -62,6 +66,6 @@ func (tl *TodoList) PrintList() {
 		if item.Completed {
 			status = "Completed"
 		}
-		fmt.Printf("%d. %s (%s)\n", item.ID, item.Title, status)
+		fmt.Printf("> %s (ID: %d, Status: %s)\n", item.Title, item.OriginalID, status)
 	}
 }
